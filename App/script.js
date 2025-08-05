@@ -11,12 +11,101 @@ let isDragging = false;
 let startX = 0;
 let startWidth = 0;
 
+// Modules data with Bootstrap icons
+const modulesData = {
+  "modules": [
+    {
+      "id": "dashboard",
+      "name": "Dashboard",
+      "icon": "bi bi-speedometer2",
+      "subSections": [
+        { "id": "overview", "name": "Overview" },
+        { "id": "reports", "name": "Reports" },
+        { "id": "analytics", "name": "Analytics" }
+      ]
+    },
+    {
+      "id": "customers",
+      "name": "Customers",
+      "icon": "bi bi-people-fill",
+      "subSections": [
+        { "id": "all-customers", "name": "All Customers" },
+        { "id": "leads", "name": "Leads" },
+        { "id": "accounts", "name": "Accounts" },
+        { "id": "contacts", "name": "Contacts" }
+      ]
+    },
+    {
+      "id": "deals",
+      "name": "Deals",
+      "icon": "bi bi-cash-stack",
+      "subSections": [
+        { "id": "active-deals", "name": "Active Deals" },
+        { "id": "closed-deals", "name": "Closed Deals" },
+        { "id": "pipeline-view", "name": "Pipeline View" },
+        { "id": "forecasting", "name": "Forecasting" }
+      ]
+    },
+    {
+      "id": "tasks",
+      "name": "Tasks",
+      "icon": "bi bi-check2-square",
+      "subSections": [
+        { "id": "my-tasks", "name": "My Tasks" },
+        { "id": "team-tasks", "name": "Team Tasks" },
+        { "id": "overdue-tasks", "name": "Overdue Tasks" },
+        { "id": "calendar", "name": "Calendar" }
+      ]
+    },
+    {
+      "id": "campaigns",
+      "name": "Campaigns",
+      "icon": "bi bi-megaphone-fill",
+      "subSections": [
+        { "id": "active-campaigns", "name": "Active Campaigns" },
+        { "id": "past-campaigns", "name": "Past Campaigns" },
+        { "id": "templates", "name": "Templates" }
+      ]
+    },
+    {
+      "id": "support",
+      "name": "Support",
+      "icon": "bi bi-headset",
+      "subSections": [
+        { "id": "open-tickets", "name": "Open Tickets" },
+        { "id": "resolved-tickets", "name": "Resolved Tickets" },
+        { "id": "knowledge-base", "name": "Knowledge Base" }
+      ]
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "icon": "bi bi-gear-fill",
+      "subSections": [
+        { "id": "user-management", "name": "User Management" },
+        { "id": "integrations", "name": "Integrations" },
+        { "id": "preferences", "name": "Preferences" },
+        { "id": "data-import-export", "name": "Data Import/Export" }
+      ]
+    }
+  ]
+};
+
+// DOM elements
+const miniSidebar = document.getElementById("miniSidebar");
+const subSidebar = document.getElementById("subSidebar");
+const subList = document.getElementById("subList");
+const searchInput = document.getElementById("searchInput");
+const expandBtn = document.getElementById("expandBtn");
+const mainContent = document.getElementById("mainContent");
+const dragHandle = document.getElementById("dragHandle");
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
     checkAuth();
-    loadCRMData();
     initializeDragAndExpand();
+    renderIcons();
 });
 
 // Data Management Functions
@@ -40,6 +129,9 @@ function loadData() {
     const savedCRMData = localStorage.getItem('crm_data');
     if (savedCRMData) {
         crmData = JSON.parse(savedCRMData);
+    } else {
+        crmData = modulesData;
+        saveCRMData();
     }
 }
 
@@ -53,55 +145,45 @@ function saveCRMData() {
 
 // Drag and Expand Functionality
 function initializeDragAndExpand() {
-    const expandBtn = document.getElementById('expandBtn');
-    const dragHandle = document.getElementById('dragHandle');
-    const subSidebar = document.getElementById('subSidebar');
-    const miniSidebar = document.getElementById('miniSidebar');
-
     // Expand button functionality
-    expandBtn.addEventListener('click', function() {
+    expandBtn.addEventListener('click', () => {
+        isExpanded = !isExpanded;
+
         if (isExpanded) {
-            // Collapse
-            subSidebar.style.width = '250px';
-            miniSidebar.style.width = '5%';
-            expandBtn.innerHTML = '<i class="bi bi-arrows-fullscreen"></i>';
-            isExpanded = false;
+            miniSidebar.classList.add("hide");
+            subSidebar.classList.add("hide");
+            dragHandle.classList.add("hide");
+            mainContent.style.width = "100%";
+            expandBtn.innerHTML = `<i class="bi bi-arrow-left-right"></i>`;
         } else {
-            // Expand
-            subSidebar.style.width = '400px';
-            miniSidebar.style.width = '8%';
-            expandBtn.innerHTML = '<i class="bi bi-arrows-collapse"></i>';
-            isExpanded = true;
+            miniSidebar.classList.remove("hide");
+            subSidebar.classList.remove("hide");
+            dragHandle.classList.remove("hide");
+            mainContent.style.width = "auto";
+            expandBtn.innerHTML = `<i class="bi bi-arrows-fullscreen"></i>`;
         }
     });
 
     // Drag handle functionality
-    dragHandle.addEventListener('mousedown', function(e) {
+    dragHandle.addEventListener('mousedown', () => {
         isDragging = true;
-        startX = e.clientX;
-        startWidth = subSidebar.offsetWidth;
-        
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        
-        // Prevent text selection while dragging
-        e.preventDefault();
+        document.body.style.cursor = "col-resize";
     });
 
-    function handleMouseMove(e) {
+    document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        
-        const deltaX = e.clientX - startX;
-        const newWidth = Math.max(150, Math.min(500, startWidth + deltaX));
-        
-        subSidebar.style.width = newWidth + 'px';
-    }
 
-    function handleMouseUp() {
+        let newWidth = e.clientX - miniSidebar.offsetWidth;
+        if (newWidth < 150) newWidth = 150;
+        if (newWidth > 500) newWidth = 500;
+
+        subSidebar.style.width = `${newWidth}px`;
+    });
+
+    document.addEventListener('mouseup', () => {
         isDragging = false;
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-    }
+        document.body.style.cursor = "default";
+    });
 
     // Add visual feedback for drag handle
     dragHandle.addEventListener('mouseenter', function() {
@@ -113,6 +195,49 @@ function initializeDragAndExpand() {
             this.style.background = '#ccc';
         }
     });
+}
+
+// Render Icons Function
+function renderIcons(filter = "") {
+    miniSidebar.innerHTML = "";
+    modulesData.modules.forEach(module => {
+        if (module.name.toLowerCase().includes(filter) ||
+            module.subSections.some(s => s.name.toLowerCase().includes(filter))) {
+
+            const iconDiv = document.createElement("div");
+            iconDiv.innerHTML = `<i class="${module.icon} fs-4"></i>`;
+            iconDiv.title = module.name;
+
+            iconDiv.addEventListener("click", () => {
+                loadSubSections(module);
+            });
+
+            miniSidebar.appendChild(iconDiv);
+        }
+    });
+}
+
+// Load Sub Sections Function
+function loadSubSections(module) {
+    currentModule = module.id;
+    subSidebar.querySelector("h6").textContent = module.name;
+    subList.innerHTML = "";
+
+    module.subSections.forEach(sub => {
+        const li = document.createElement("li");
+        li.classList.add("list-group-item");
+        li.textContent = sub.name;
+
+        li.addEventListener("click", () => {
+            currentSection = sub.id;
+            showSectionContent(module, sub);
+        });
+
+        subList.appendChild(li);
+    });
+
+    // Show module overview
+    showModuleContent(module);
 }
 
 // Authentication Functions
@@ -230,117 +355,12 @@ function updateUserStatus(status) {
     }
 }
 
-// CRM Data Loading
-function loadCRMData() {
-    // Load CRM modules from the JSON file
-    fetch('crm_modules.json')
-        .then(response => response.json())
-        .then(data => {
-            crmData = data;
-            saveCRMData();
-            displayCRMData(data);
-        })
-        .catch(error => {
-            console.error('Error loading CRM data:', error);
-            // Fallback data
-            const fallbackData = {
-                modules: [
-                    { id: "dashboard", name: "Dashboard", icon: "🏠", subSections: [
-                        { id: "overview", name: "Overview" },
-                        { id: "reports", name: "Reports" },
-                        { id: "analytics", name: "Analytics" }
-                    ]},
-                    { id: "customers", name: "Customers", icon: "👤", subSections: [
-                        { id: "all-customers", name: "All Customers" },
-                        { id: "leads", name: "Leads" },
-                        { id: "accounts", name: "Accounts" },
-                        { id: "contacts", name: "Contacts" }
-                    ]},
-                    { id: "deals", name: "Deals", icon: "💰", subSections: [
-                        { id: "active-deals", name: "Active Deals" },
-                        { id: "closed-deals", name: "Closed Deals" },
-                        { id: "pipeline-view", name: "Pipeline View" },
-                        { id: "forecasting", name: "Forecasting" }
-                    ]},
-                    { id: "tasks", name: "Tasks", icon: "📋", subSections: [
-                        { id: "my-tasks", name: "My Tasks" },
-                        { id: "team-tasks", name: "Team Tasks" },
-                        { id: "overdue-tasks", name: "Overdue Tasks" },
-                        { id: "calendar", name: "Calendar" }
-                    ]},
-                    { id: "campaigns", name: "Campaigns", icon: "📢", subSections: [
-                        { id: "active-campaigns", name: "Active Campaigns" },
-                        { id: "past-campaigns", name: "Past Campaigns" },
-                        { id: "templates", name: "Templates" }
-                    ]},
-                    { id: "support", name: "Support", icon: "🎧", subSections: [
-                        { id: "open-tickets", name: "Open Tickets" },
-                        { id: "resolved-tickets", name: "Resolved Tickets" },
-                        { id: "knowledge-base", name: "Knowledge Base" }
-                    ]},
-                    { id: "settings", name: "Settings", icon: "⚙️", subSections: [
-                        { id: "user-management", name: "User Management" },
-                        { id: "integrations", name: "Integrations" },
-                        { id: "preferences", name: "Preferences" },
-                        { id: "data-import-export", name: "Data Import/Export" }
-                    ]}
-                ]
-            };
-            crmData = fallbackData;
-            saveCRMData();
-            displayCRMData(fallbackData);
-        });
-}
-
-function displayCRMData(data) {
-    const subList = document.getElementById('subList');
-    subList.innerHTML = '';
-
-    data.modules.forEach(module => {
-        const moduleItem = document.createElement('li');
-        moduleItem.textContent = module.name;
-        moduleItem.onclick = () => showModule(module.id);
-        subList.appendChild(moduleItem);
-    });
-}
-
-// Module Navigation Functions
-function showModule(moduleId) {
-    currentModule = moduleId;
-    const module = crmData.modules.find(m => m.id === moduleId);
-    
-    if (module) {
-        // Update sub sidebar
-        const subList = document.getElementById('subList');
-        subList.innerHTML = '';
-        
-        module.subSections.forEach(section => {
-            const sectionItem = document.createElement('li');
-            sectionItem.textContent = section.name;
-            sectionItem.onclick = () => showSection(moduleId, section.id);
-            subList.appendChild(sectionItem);
-        });
-        
-        // Update main content
-        showModuleContent(module);
-    }
-}
-
-function showSection(moduleId, sectionId) {
-    currentSection = sectionId;
-    const module = crmData.modules.find(m => m.id === moduleId);
-    const section = module.subSections.find(s => s.id === sectionId);
-    
-    if (section) {
-        showSectionContent(module, section);
-    }
-}
-
+// Module Content Functions
 function showModuleContent(module) {
     const dataDisplay = document.getElementById('dataDisplay');
     dataDisplay.innerHTML = `
         <div class="d-flex align-items-center mb-3">
-            <span style="font-size: 2rem; margin-right: 1rem;">${module.icon}</span>
+            <i class="${module.icon} fs-1 me-3 text-primary"></i>
             <div>
                 <h4 class="mb-0">${module.name}</h4>
                 <p class="text-muted mb-0">Select a section to view details</p>
@@ -349,7 +369,7 @@ function showModuleContent(module) {
         <div class="row">
             ${module.subSections.map(section => `
                 <div class="col-md-4 mb-3">
-                    <div class="card h-100" onclick="showSection('${module.id}', '${section.id}')" style="cursor: pointer;">
+                    <div class="card h-100" onclick="showSectionContent('${module.id}', '${section.id}')" style="cursor: pointer;">
                         <div class="card-body">
                             <h6 class="card-title">${section.name}</h6>
                             <p class="card-text text-muted">Click to view ${section.name.toLowerCase()} details</p>
@@ -361,6 +381,16 @@ function showModuleContent(module) {
     `;
 }
 
+function showSectionContent(moduleId, sectionId) {
+    const module = modulesData.modules.find(m => m.id === moduleId);
+    const section = module.subSections.find(s => s.id === sectionId);
+    
+    if (section) {
+        currentSection = sectionId;
+        showSectionContent(module, section);
+    }
+}
+
 function showSectionContent(module, section) {
     const dataDisplay = document.getElementById('dataDisplay');
     
@@ -369,7 +399,7 @@ function showSectionContent(module, section) {
     
     dataDisplay.innerHTML = `
         <div class="d-flex align-items-center mb-3">
-            <span style="font-size: 2rem; margin-right: 1rem;">${module.icon}</span>
+            <i class="${module.icon} fs-1 me-3 text-primary"></i>
             <div>
                 <h4 class="mb-0">${section.name}</h4>
                 <p class="text-muted mb-0">${module.name} > ${section.name}</p>
@@ -574,19 +604,8 @@ function generateReport(moduleId, sectionId) {
 }
 
 // Search functionality
-document.getElementById('searchInput').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const subList = document.getElementById('subList');
-    const items = subList.getElementsByTagName('li');
-    
-    Array.from(items).forEach(item => {
-        const text = item.textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
+searchInput.addEventListener('input', (e) => {
+    renderIcons(e.target.value.toLowerCase());
 });
 
 // Utility Functions
