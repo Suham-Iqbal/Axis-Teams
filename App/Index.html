@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM Dashboard</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav class="navbar navbar-light bg-light px-3 border-bottom shadow-sm">
+    <a class="navbar-brand fw-bold">
+     CRM
+    </a>
+    <form class="d-flex w-50">
+      <input class="form-control me-2" id="searchInput" type="search" placeholder="Search modules or sections...">
+    </form>
+    <div class="d-flex align-items-center">
+      <i class="bi bi-person-circle fs-4 text-primary me-2"></i> <span id="currentUsername">User</span>
+    </div>
+  </nav>
+
+  <div class="d-flex" style="height: calc(100vh - 56px); overflow: hidden;">
+
+    <aside id="miniSidebar" class="bg-dark text-white p-2 d-flex flex-column align-items-center" style="width:5%;">
+      <div onclick="showModule('dashboard')" title="Dashboard">🏠</div>
+      <div onclick="showModule('customers')" title="Customers">👤</div>
+      <div onclick="showModule('deals')" title="Deals">💰</div>
+      <div onclick="showModule('tasks')" title="Tasks">📋</div>
+      <div onclick="showModule('campaigns')" title="Campaigns">📢</div>
+      <div onclick="showModule('support')" title="Support">🎧</div>
+      <div onclick="showModule('settings')" title="Settings">⚙️</div>
+    </aside>
+
+    <aside id="subSidebar" class="bg-light border-end p-2" style="width:250px; min-width:150px; max-width:500px;">
+      <h6 class="fw-bold mb-2">Select a Module</h6>
+      <ul id="subList" class="list-group list-group-flush"></ul>
+    </aside>
+
+    <div id="dragHandle" class="drag-handle"></div>
+
+    <main id="mainContent" class="flex-grow-1 bg-white">
+      <div class="d-flex justify-content-between align-items-center border-bottom p-2">
+        <button id="expandBtn" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrows-fullscreen"></i>
+        </button>
+        <h5 class="mb-0">CRM Dashboard</h5>
+      </div>
+      <div id="dataDisplay" class="p-3">
+        <p>Select a module</p>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Authentication Modal -->
+  <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="authModalLabel">Welcome to CRM Dashboard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="loginForm">
+                    <h6 class="mb-3">Login</h6>
+                    <div class="mb-3">
+                        <label for="loginUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="loginUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="loginPassword" required>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 mb-2" onclick="login()">Login</button>
+                    <p class="text-center mb-0">
+                        <small>Don't have an account? <a href="#" onclick="showSignup()">Sign up</a></small>
+                    </p>
+                </div>
+                
+                <div id="signupForm" style="display: none;">
+                    <h6 class="mb-3">Sign Up</h6>
+                    <div class="mb-3">
+                        <label for="signupUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="signupUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signupEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="signupEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signupPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="signupPassword" required>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 mb-2" onclick="signup()">Sign Up</button>
+                    <p class="text-center mb-0">
+                        <small>Already have an account? <a href="#" onclick="showLogin()">Login</a></small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
